@@ -1,0 +1,10 @@
+.Footer {
+    position: absolute;
+    bottom: 0;
+}
+
+.foot {
+    padding: var(--spacing-sm) 0;
+    width: 100vw;
+    text-align: center;
+}

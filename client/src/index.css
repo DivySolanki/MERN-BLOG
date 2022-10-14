@@ -1,0 +1,26 @@
+
+.langing-pg {
+    position: relative;
+    overflow: hidden;
+    animation: background-gradient 15s;
+    animation-iteration-count: infinite;
+    backface-visibility: hidden;
+    animation-timing-function: ease-in-out;
+    background-image: linear-gradient(45deg, transparent, #2d1d221d);
+}
+
+@keyframes background-gradient {
+    0% {
+      background-color: #633838;
+    }
+    25% {
+      background-color: rgba(45, 45, 34, 0);
+    }
+    50% {
+      background-color: #242442;
+    }
+    100% {
+      background-color: #384f4a;
+    }
+  }
+  
