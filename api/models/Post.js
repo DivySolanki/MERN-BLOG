@@ -26,6 +26,7 @@ const PostSchema = new mongoose.Schema(
         },
         liked: {
             type: Array,
+            ref: "User",
             required: false
         },
     }, { timestamps: true });

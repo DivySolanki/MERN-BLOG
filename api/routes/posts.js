@@ -90,41 +90,37 @@ router.get("/", async (req, res) => {
 });
 
 router.patch("/:id/like", async (req, res) => {
-
     const { id } = req.params;
-    const post = await Post.findById(id);
     const username = req.body.username;
-
-    for (let x in post.liked) {
-        if (post.liked[x] == username) {
-            try {
-                const updatedBlogPost = await Post.findByIdAndUpdate(
-                    id,
-                    { $pull: { liked: username } },
-                    { new: true }
-                );
-
-                res.status(200).json(updatedBlogPost);
-                console.log(updatedBlogPost);
-            } catch (err) {
-                res.status(500).json(err);
-            }
-        } else {
-            try {
-                const updatedBlogPost = await Post.findByIdAndUpdate(
-                    id,
-                    { $push: { liked: username } },
-                    { new: true }
-                );
-
-                res.status(200).json(updatedBlogPost);
-                console.log(updatedBlogPost);
-            } catch (err) {
-                res.status(500).json(err);
-            }
-        }
+    try {
+        const updatedBlogPost = await Post.findByIdAndUpdate(
+            id,
+            { $push: { liked: username } },
+            { new: true }
+        )
+        res.status(200).json(updatedBlogPost)
+        console.log(updatedBlogPost);
+    } catch (err) {
+        res.status(500).json(err)
     }
+
 });
+
+router.patch("/:id/unlike", async (req, res) => {
+    const { id } = req.params;
+    const username = req.body.username;
+    try {
+        const updatedBlogPost = await Post.findByIdAndUpdate(
+            id,
+            { $pull: { liked: username } },
+            { new: true }
+        )
+        res.status(200).json(updatedBlogPost)
+        console.log(updatedBlogPost);
+    } catch (err) {
+        res.status(500).json(err)
+    }
+})
 
 // router.patch("/:id/unlikedBlogPost", async (req, res) => {
 

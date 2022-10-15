@@ -16,7 +16,7 @@ export default function SinglePost() {
     const [title, setTitle] = useState("");
     const [desc, setDesc] = useState("");
     const [updateMode, setUpdateMode] = useState(false);
-    const [likePressed, setLikedPressed] = useState("0");
+    const [likePressed, setLikedPressed] = useState(false);
 
     useEffect(() => {
         const getPost = async () => {
@@ -28,6 +28,10 @@ export default function SinglePost() {
         }
         getPost()
     }, [path, likePressed])
+
+    // useEffect(() => {
+    //     likePressed = likePressed;
+    // }, [likePressed])
 
     const handleDelete = async () => {
         try {
@@ -49,15 +53,42 @@ export default function SinglePost() {
         }
     }
 
+    // const didLike = () => {
+    //     if (likeToggle === true) {
+    //         handleUnlike
+    //     } else {
+    //         handleLike
+    //     }
+    // }
+
+    // const likeToggle = () => {
+    //     const likes = post.liked;
+    //     console.log(likes);
+    //     const username = user.username;
+    //     console.log(username);
+    //     let match = likes.indexOf(username) !== -1
+    //     return match
+    // }
+
     const handleLike = async () => {
         try {
-            await axios.patch("/posts/" + path + "/like",
+            const res = await axios.patch("/posts/" + path + "/like",
                 { username: user.username });
+            setLikedPressed(res.liked.length)
         } catch (err) {
             console.log(err);
         }
     }
 
+    const handleUnlike = async () => {
+        try {
+            const res = await axios.patch("/posts/" + path + "/unlike",
+                { username: user.username });
+            setLikedPressed(res.liked.length)
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
     return (
         <div className='singlePost'>
@@ -78,7 +109,20 @@ export default function SinglePost() {
                             )}
                             {user.username && (
                                 <div className="singlePostEdit">
-                                    <i class="singlePostIcon fa-regular fa-heart" onClick={handleLike}><span>{likePressed}</span></i>
+                                    {/* <i class="fa-regular fa-heart" onClick={
+                                        () => {
+                                            likeToggle ? handleLike : handleUnlike
+                                        }
+                                    }>
+                                        <span> {likePressed} likes</span>
+                                    </i> */}
+
+                                    <i class="singlePostIcon fa-regular fa-thumbs-up" onClick={
+                                        handleLike
+                                    }></i>
+                                    <i class="singlePostIcon fa-regular fa-thumbs-down" onClick={
+                                        handleUnlike
+                                    }></i>
                                 </div>
                             )}
                         </h1>
