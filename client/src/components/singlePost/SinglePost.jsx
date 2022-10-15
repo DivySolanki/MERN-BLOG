@@ -16,7 +16,10 @@ export default function SinglePost() {
     const [title, setTitle] = useState("");
     const [desc, setDesc] = useState("");
     const [updateMode, setUpdateMode] = useState(false);
-    const [likePressed, setLikedPressed] = useState(false);
+    const [postFetched, isFetching] = useState(false);
+    const [like, setLike] = useState(post.liked.length);
+    const [isLiked, setIsLiked] = useState(false);
+
 
     useEffect(() => {
         const getPost = async () => {
@@ -24,10 +27,22 @@ export default function SinglePost() {
             setPost(res.data)
             setTitle(res.data.title)
             setDesc(res.data.desc)
-            setLikedPressed(res.data.liked.length)
+            isFetching(true)
         }
         getPost()
-    }, [path, likePressed])
+    }, [path, postFetched])
+
+    useEffect(() => {
+        setIsLiked(post.liked.includes(user.username))
+    }, [user.username, post.liked])
+
+    const likeHandler = () => {
+        try {
+            axios.put("/posts/" + path + "/like", { username: user.username })
+        } catch (err) { }
+        setLike(isLiked ? like - 1 : like + 1)
+        setIsLiked(!isLiked)
+    }
 
     // useEffect(() => {
     //     likePressed = likePressed;
@@ -70,25 +85,25 @@ export default function SinglePost() {
     //     return match
     // }
 
-    const handleLike = async () => {
-        try {
-            const res = await axios.patch("/posts/" + path + "/like",
-                { username: user.username });
-            setLikedPressed(res.liked.length)
-        } catch (err) {
-            console.log(err);
-        }
-    }
+    // const handleLike = async () => {
+    //     try {
+    //         const res = await axios.patch("/posts/" + path + "/like",
+    //             { username: user.username });
+    //         setLikedPressed(res.liked.length)
+    //     } catch (err) {
+    //         console.log(err);
+    //     }
+    // }
 
-    const handleUnlike = async () => {
-        try {
-            const res = await axios.patch("/posts/" + path + "/unlike",
-                { username: user.username });
-            setLikedPressed(res.liked.length)
-        } catch (err) {
-            console.log(err);
-        }
-    }
+    // const handleUnlike = async () => {
+    //     try {
+    //         const res = await axios.patch("/posts/" + path + "/unlike",
+    //             { username: user.username });
+    //         setLikedPressed(res.liked.length)
+    //     } catch (err) {
+    //         console.log(err);
+    //     }
+    // }
 
     return (
         <div className='singlePost'>
@@ -109,20 +124,9 @@ export default function SinglePost() {
                             )}
                             {user.username && (
                                 <div className="singlePostEdit">
-                                    {/* <i class="fa-regular fa-heart" onClick={
-                                        () => {
-                                            likeToggle ? handleLike : handleUnlike
-                                        }
-                                    }>
-                                        <span> {likePressed} likes</span>
-                                    </i> */}
-
-                                    <i class="singlePostIcon fa-regular fa-thumbs-up" onClick={
-                                        handleLike
-                                    }></i>
-                                    <i class="singlePostIcon fa-regular fa-thumbs-down" onClick={
-                                        handleUnlike
-                                    }></i>
+                                    <i class="fa-regular fa-heart" onClick={likeHandler}>
+                                        <span> {like} likes</span>
+                                    </i>
                                 </div>
                             )}
                         </h1>
