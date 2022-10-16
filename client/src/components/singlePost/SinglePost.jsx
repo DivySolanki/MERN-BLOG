@@ -17,9 +17,10 @@ export default function SinglePost() {
     const [desc, setDesc] = useState("");
     const [updateMode, setUpdateMode] = useState(false);
     const [postFetched, isFetching] = useState(false);
-    const [like, setLike] = useState(post.liked.length);
+    const [like, setLike] = useState("");
     const [isLiked, setIsLiked] = useState(false);
-
+    const [cats, setCats] = useState([]);
+    const [comments, setComments] = useState([]);
 
     useEffect(() => {
         const getPost = async () => {
@@ -27,30 +28,28 @@ export default function SinglePost() {
             setPost(res.data)
             setTitle(res.data.title)
             setDesc(res.data.desc)
+            setLike(res.data.liked.length)
+            setComments(res.data.comments)
             isFetching(true)
         }
         getPost()
-    }, [path, postFetched])
+    }, [path, comments])
 
     useEffect(() => {
-        setIsLiked(post.liked.includes(user.username))
-    }, [user.username, post.liked])
+        postFetched && setIsLiked(post.liked.includes(user?.username))
+    }, [user?.username, post.liked])
 
     const likeHandler = () => {
         try {
-            axios.put("/posts/" + path + "/like", { username: user.username })
+            axios.put("/posts/" + path + "/like", { username: user?.username })
         } catch (err) { }
         setLike(isLiked ? like - 1 : like + 1)
         setIsLiked(!isLiked)
     }
 
-    // useEffect(() => {
-    //     likePressed = likePressed;
-    // }, [likePressed])
-
     const handleDelete = async () => {
         try {
-            await axios.delete("/posts/" + path, { data: { username: user.username } });
+            await axios.delete("/posts/" + path, { data: { username: user?.username } });
             window.location.replace("/");
         } catch (err) {
 
@@ -60,7 +59,7 @@ export default function SinglePost() {
     const handleUpdate = async () => {
         try {
             await axios.put("/posts/" + path,
-                { username: user.username, title, desc }
+                { username: user?.username, title, desc }
             );
             setUpdateMode(false)
         } catch (err) {
@@ -68,42 +67,15 @@ export default function SinglePost() {
         }
     }
 
-    // const didLike = () => {
-    //     if (likeToggle === true) {
-    //         handleUnlike
-    //     } else {
-    //         handleLike
-    //     }
-    // }
+    const makeComment = async (text, user) => {
+        try {
+            await axios.put("/posts/" + path + "/comment",
+                { text, user }
+            );
+        } catch (err) {
 
-    // const likeToggle = () => {
-    //     const likes = post.liked;
-    //     console.log(likes);
-    //     const username = user.username;
-    //     console.log(username);
-    //     let match = likes.indexOf(username) !== -1
-    //     return match
-    // }
-
-    // const handleLike = async () => {
-    //     try {
-    //         const res = await axios.patch("/posts/" + path + "/like",
-    //             { username: user.username });
-    //         setLikedPressed(res.liked.length)
-    //     } catch (err) {
-    //         console.log(err);
-    //     }
-    // }
-
-    // const handleUnlike = async () => {
-    //     try {
-    //         const res = await axios.patch("/posts/" + path + "/unlike",
-    //             { username: user.username });
-    //         setLikedPressed(res.liked.length)
-    //     } catch (err) {
-    //         console.log(err);
-    //     }
-    // }
+        }
+    }
 
     return (
         <div className='singlePost'>
@@ -114,7 +86,7 @@ export default function SinglePost() {
                     updateMode ? (<input type="text" value={title} className="singlePostTitleInput" autoFocus onChange={(e) => { setTitle(e.target.value) }} />) : (
                         <h1 className="singlePostTitle">
                             {title}
-                            {post.username === user.username && (
+                            {post.username === user?.username && (
                                 <div className="singlePostEdit">
                                     <i className="singlePostIcon fa-solid fa-pen-to-square" onClick={() => {
                                         setUpdateMode(true)
@@ -122,9 +94,9 @@ export default function SinglePost() {
                                     <i className="singlePostIcon fa-solid fa-trash-can" onClick={handleDelete}></i>
                                 </div>
                             )}
-                            {user.username && (
+                            {user?.username && (
                                 <div className="singlePostEdit">
-                                    <i class="fa-regular fa-heart" onClick={likeHandler}>
+                                    <i className="fa-regular fa-heart" onClick={likeHandler}>
                                         <span> {like} likes</span>
                                     </i>
                                 </div>
@@ -136,6 +108,9 @@ export default function SinglePost() {
                         <Link to={`/?user=${post.username}`} className="link">
                             <b>{post.username}</b>
                         </Link>
+                    </span>
+                    <span>
+                        <b>Categories: {cats.map(e => { return (<b>{e}</b>) })}</b>
                     </span>
                     <span className='singlePostDate'>Date: <b>{
                         new Date(post.createdAt).toDateString()
@@ -149,6 +124,28 @@ export default function SinglePost() {
                     (<button className="singlePostButton" onClick={handleUpdate}>Update</button>)
                 }
             </div>
+            <div>
+                <h3>{
+                    comments.map(record => {
+                        return (
+                            <h6>{record.postedBy}: {record.text}</h6>
+                        )
+                    })
+                }</h3>
+
+            </div>
+            {
+                user?.username && (
+                    <div>
+                        <form onSubmit={(e) => {
+                            e.preventDefault();
+                            makeComment(e.target[0].value, user.username)
+                        }}>
+                            <input type="text" placeholder='add a comment' />
+                        </form>
+                    </div>
+                )
+            }
         </div>
     );
 }
